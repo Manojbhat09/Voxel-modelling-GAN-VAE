@@ -14,7 +14,7 @@ class Encoder(nn.Module):
         # encMu - Linear - Input: 343, Output: 100 (Latent Dimension; needs to be reparameterized)
         # encStd - Linear - Input: 343, Output: 100 (Latent Dimension; needs to be reparameterized)
 
-        latent_dim = 100
+        latent_dim = 1000
         self.encMu = nn.Linear(343, latent_dim)
         self.encStd = nn.Linear(343, latent_dim)
 
@@ -49,6 +49,11 @@ class Encoder(nn.Module):
         predMu = self.encMu(latent_input)
         predStd = self.encStd(latent_input)
 
+
+        #print(self.fc1.weight.grad)
+        #print(self.encMu.weight.grad)
+        #print(self.encStd.weight.grad)
+
         return predMu, predStd
 
 
@@ -64,7 +69,7 @@ class Decoder(nn.Module):
         #Layer 4 - conv3d - Input: 15x15x15, Output: 32x32x32
         #Layer 5 - conv3d - Input: 32x32x32, Output: 32x32x32 (Output)
 
-        self.batchDim = 13
+        self.batchDim = 307
 
         self.decModel = nn.Sequential(
             #nn.Linear(343, (7,7,7)),
@@ -87,7 +92,7 @@ class Decoder(nn.Module):
 
     def forward(self, x): #x is the latent layer, could be random noise. Is a probabilistic distribution.
 
-        self.fc1 = nn.Linear(100, 5*6*6*6)
+        self.fc1 = nn.Linear(1000, 5*6*6*6)
 
         #x is of dim batch_dim x 100
 
@@ -118,8 +123,14 @@ class VAE(nn.Module):
         std = torch.exp(0.5*std)
         eps = torch.randn_like(std)
         z = mu + eps*std 
+
         output = self.dec.forward(z) 
-        return output, mu, std
+
+        self.classifier = nn.Linear(1000, 1) #latent_dim, 1)
+
+
+
+        return output, mu, std, z
     def decode(self, z):
         # given random noise z, generates a voxel object
         return self.dec(z)

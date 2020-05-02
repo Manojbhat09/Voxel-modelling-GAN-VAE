@@ -76,11 +76,18 @@ class trainData(Dataset):
         yTest = voxData['y_test']  # ndarray of size (908, )
         yTrain = voxData['y_train']  # ndarray of size (3991, )
 
+        bcelabels = np.zeros((3991, 10))
+
+        for i in range(len(yTrain)):
+            idx = yTrain[i]
+            bcelabels[i][idx] = 1
+
         self.xData = xTrain
         self.yData = yTrain
+        self.BCELabels = bcelabels #Each label consists of a 10-length vector where the corresponding index of the desired object class is 1 and everything else is zero.
 
     def __getitem__(self, idx):
-        return self.xData[idx], self.yData[idx]
+        return self.xData[idx], self.yData[idx], self.BCELabels[idx]
 
     def __len__(self):
         return len(self.yData)

@@ -18,10 +18,11 @@ def main():
     device = 'cpu'
 
     # Definer Hyperparameters
-    latent_dim = 100
+    latent_dim = 1000
     lr = 0.005         # learning rate
     num_epochs = 10
-    batch_dim = 13 #13 or 307
+    batch_dim = 307 #13 or 307
+    gamma = 0.97
 
     #Load Data
     #dataset = VoxelDataSet()
@@ -41,32 +42,34 @@ def main():
 
         MSELoss = F.mse_loss(reconstructedData, data)
 
-        print("  MSE: ", MSELoss.item())
 
-        print("         std: ", std)
-        print("         mu: ", mu)
+        #print("  MSE: ", MSELoss.item())
 
-        KLDivergence = -0.5 * torch.sum(1 + std - mu.pow(2) - std.exp())
+        #print("         std: ", std)
+        #print("         mu: ", mu)
 
-        print("  KLD: ", KLDivergence.item())
+        #KLDivergence = -0.5 * torch.sum(1 + std - mu.pow(2) - std.exp())
 
-        a = 3 #alpha, weight of KL Divergence
+        #print("  KLD: ", KLDivergence.item())
 
-        loss = MSELoss + a * KLDivergence
+        #a = 3 #alpha, weight of KL Divergence
 
-        print("  Loss: ", loss.item())
+        #loss = MSELoss + a * KLDivergence
+        loss = MSELoss
+
+        #print("  Loss: ", loss.item())
 
         return loss
 
     # define optimizer for discriminator and generator separately
-    optim = Adam(vae.parameters(), lr=lr)
+    optim = Adam(vae.parameters(), lr=lr, weight_decay=1e-4)
 
     epochVals = []
     lossVals = []
     
     #Training
     for epoch in range(num_epochs):
-        for n_batch, (x_batch, labels) in enumerate(trainLoader): #x_batch are the actual voxel objects, the labels are the modelnet object classes, ints from 0-9. The labels aren't terribly important.
+        for n_batch, (x_batch, labels, BCELabels) in enumerate(trainLoader): #x_batch are the actual voxel objects, the labels are the modelnet object classes, ints from 0-9. The labels aren't terribly important.
                                                                     
             #print("    Batch ", n_batch)
 
@@ -78,16 +81,17 @@ def main():
             x_batch = x_batch.unsqueeze(1) 
             x_batch = x_batch.float()
 
-            output, mu, std = vae(x_batch) 
+            output, mu, std, l_z = vae(x_batch) 
 
-            #print(x_batch.shape)
-            #print(output.shape)
+            #Get Labels
+            BCELabels = BCELabels.to(device)
 
             loss = getLoss(output, x_batch, mu, std)
 
             optim.zero_grad()
             loss.backward()
             optim.step()
+
             #print("     Loss, ", loss )
             
             if (n_batch + 1) % 7 == 0:

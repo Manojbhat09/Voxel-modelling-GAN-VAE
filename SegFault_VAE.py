@@ -21,16 +21,16 @@ class Encoder(nn.Module):
         # Main throughput is be a 5d tensor - (batchSize, numChannels, Depth, Height, Width)
         self.encModel = nn.Sequential(
             nn.Conv3d(1, 2, (3,3,3), stride=(1,1,1),padding=0), #inchannel, outchannel, kernelSize, stride, padding
-            nn.ELU(),
+            nn.ELU(), #Output 28
             nn.BatchNorm3d(2), #Expects a 5d input (batchSize, numChannels, Depth, Height, Width). Arg is numChannels.
             nn.Conv3d(2, 3, (3,3,3), stride=(2,2,2),padding=1), #Layer 2
-            nn.ELU(),
+            nn.ELU(), #Output 14
             nn.BatchNorm3d(3),
             nn.Conv3d(3, 4, (3,3,3), stride=(1,1,1),padding=0), #Layer 3
-            nn.ELU(),
+            nn.ELU(), #Output 12
             nn.BatchNorm3d(4),
-            nn.Conv3d(4, 5, (3,3,3), stride=(2,2,2),padding=1), #Layer 4
-            nn.ELU(),
+            nn.Conv3d(4, 5, (4,4,4), stride=(2,2,2),padding=1), #Layer 4
+            nn.ELU(), #Output 6
             nn.BatchNorm3d(5),
             #nn.Linear(64*7*7*7, 343), #Layer 5 - Input: (batchSize, channels=64, 7,7,7), Output: (batchSize, channels=64, 343)
             #nn.ELU(),
@@ -64,22 +64,23 @@ class Decoder(nn.Module):
         #Layer 4 - conv3d - Input: 15x15x15, Output: 32x32x32
         #Layer 5 - conv3d - Input: 32x32x32, Output: 32x32x32 (Output)
 
-        self.batchDim = 307
+        self.batchDim = 13
 
         self.decModel = nn.Sequential(
             #nn.Linear(343, (7,7,7)),
             #nn.ELU(),
             #nn.BatchNorm3d(64), #Expects a 5d input (batchSize, numChannels=64, 7,7,7)
-            nn.Conv3d(5, 4, (3,3,3), stride=(1,1,1),padding=0), #Layer 2
-            nn.ELU(),
+            nn.ConvTranspose3d(5, 4, (4,4,4), stride=(2,2,2),padding=1), #Layer 2
+            nn.ELU(), #Output 12
             nn.BatchNorm3d(4),
-            nn.Conv3d(4, 3, (3,3,3), stride=(1,1,1),padding=1), #Layer 3 #Check Padding
-            nn.ELU(),
+            nn.ConvTranspose3d(4, 3, (3,3,3), stride=(1,1,1),padding=0), #Layer 3 #Check Padding
+            nn.ELU(), #Output 14
             nn.BatchNorm3d(3),
-            nn.Conv3d(3, 2, (4,4,4), stride=(1,1,1),padding=0), #Layer 4
-            nn.ELU(),
+            nn.ConvTranspose3d(3, 2, (4,4,4), stride=(2,2,2),padding=1), #Layer 4
+            nn.ELU(), #Output 28
             nn.BatchNorm3d(2),
-            nn.Conv3d(2, 1, (3,3,3), stride=(1,1,1),padding=1), #Layer 5 #Check Padding
+            nn.ConvTranspose3d(2, 1, (3,3,3), stride=(1,1,1),padding=0), #Layer 5 #Check Padding
+            #Output 30
             #nn.BatchNorm3d(1)
         )
 

@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 import numpy as np
+import matplotlib.pyplot as plt
 
 from SegFault_DataSet import VoxelDataSet
 from SegFault_VAE import VAE
@@ -20,7 +21,7 @@ def main():
     latent_dim = 100
     lr = 0.005         # learning rate
     num_epochs = 10
-    batch_dim = 307 #13 or 307
+    batch_dim = 13 #13 or 307
 
     #Load Data
     #dataset = VoxelDataSet()
@@ -37,13 +38,23 @@ def main():
     #Loss Function
     def getLoss(reconstructedData, data, mu, std):
 
+
         MSELoss = F.mse_loss(reconstructedData, data)
 
+        print("  MSE: ", MSELoss.item())
+
+        print("         std: ", std)
+        print("         mu: ", mu)
+
         KLDivergence = -0.5 * torch.sum(1 + std - mu.pow(2) - std.exp())
+
+        print("  KLD: ", KLDivergence.item())
 
         a = 3 #alpha, weight of KL Divergence
 
         loss = MSELoss + a * KLDivergence
+
+        print("  Loss: ", loss.item())
 
         return loss
 
@@ -57,7 +68,7 @@ def main():
     for epoch in range(num_epochs):
         for n_batch, (x_batch, labels) in enumerate(trainLoader): #x_batch are the actual voxel objects, the labels are the modelnet object classes, ints from 0-9. The labels aren't terribly important.
                                                                     
-            print("Batch ", n_batch)
+            #print("    Batch ", n_batch)
 
             voxel_labels = labels.to(device)
             x_batch = x_batch.to(device)
@@ -69,19 +80,23 @@ def main():
 
             output, mu, std = vae(x_batch) 
 
+            #print(x_batch.shape)
+            #print(output.shape)
+
             loss = getLoss(output, x_batch, mu, std)
 
             optim.zero_grad()
             loss.backward()
             optim.step()
-
+            #print("     Loss, ", loss )
             
-            if (n_batch + 1) % 30 == 0:
+            if (n_batch + 1) % 7 == 0:
                 print("Epoch: [{}/{}], Batch: {}, loss: {}".format(
                     epoch, num_epochs, n_batch, loss.item()))
 
         epochVals = epochVals + [epoch]
         lossVals = lossVals + [loss]
+        print("Epoch ", epoch)
 
 
     torch.save(vae.state_dict(), 'vae_model.ckpt')

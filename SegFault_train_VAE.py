@@ -6,26 +6,33 @@ import numpy as np
 
 from SegFault_DataSet import VoxelDataSet
 from SegFault_VAE import VAE
-from utils import *
 
 from torch.nn import functional as F
+
+from SegFault_DataSet import trainData
+from SegFault_DataSet import testData
 
 
 def main():
     device = 'cpu'
 
-    # define dataset and dataloader
-    dataset = VoxelDataSet()
-    voxel_dataloader = DataLoader(dataset, batch_size=20, shuffle=True)
-
     # Definer Hyperparameters
     latent_dim = 100
     lr = 0.005         # learning rate
-    num_epochs = 100
+    num_epochs = 10
+    batch_dim = 307 #13 or 307
+
+    #Load Data
+    #dataset = VoxelDataSet()
+    #voxel_dataloader = DataLoader(dataset, batch_size=20, shuffle=True)
+
+    trainDataSet = trainData()
+    trainLoader = DataLoader(dataset=trainDataSet, batch_size=batch_dim, shuffle=True, num_workers=0)
+    testDataSet = testData()
+    testLoader = DataLoader(dataset=testDataSet, batch_size=batch_dim, shuffle=True, num_workers=0)
 
     # Build the model
     vae = VAE(object_dim=32, latent_dim=latent_dim).to(device)
-    print("VAE model:\n", vae)
 
     #Loss Function
     def getLoss(reconstructedData, data, mu, std):
@@ -48,23 +55,34 @@ def main():
     
     #Training
     for epoch in range(num_epochs):
-        for n_batch, (local_batch, __) in enumerate(voxel_dataloader):
-            voxel_labels = local_batch.to(device)
+        for n_batch, (x_batch, labels) in enumerate(trainLoader): #x_batch are the actual voxel objects, the labels are the modelnet object classes, ints from 0-9. The labels aren't terribly important.
+                                                                    
+            print("Batch ", n_batch)
 
-            output, mu, std = vae(voxel_labels) 
+            voxel_labels = labels.to(device)
+            x_batch = x_batch.to(device)
 
-            loss = getLoss(output, voxel_labels, mu, std)
+            #x_batch is of dimensions (batch_size, 30, 30, 30). Need to add a dimension for channels.
+
+            x_batch = x_batch.unsqueeze(1) 
+            x_batch = x_batch.float()
+
+            output, mu, std = vae(x_batch) 
+
+            loss = getLoss(output, x_batch, mu, std)
 
             optim.zero_grad()
             loss.backward()
             optim.step()
 
+            
             if (n_batch + 1) % 30 == 0:
                 print("Epoch: [{}/{}], Batch: {}, loss: {}".format(
                     epoch, num_epochs, n_batch, loss.item()))
 
         epochVals = epochVals + [epoch]
         lossVals = lossVals + [loss]
+
 
     torch.save(vae.state_dict(), 'vae_model.ckpt')
 

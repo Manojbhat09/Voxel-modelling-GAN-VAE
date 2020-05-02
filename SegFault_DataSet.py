@@ -6,24 +6,24 @@ from torch.utils.data import Dataset
 
 class VoxelDataSet(Dataset):
 
-	def __init__(self, path='./voxel_data'):
-		super(VoxelDataSet, self).__init__()
+    def __init__(self, path='./voxel_data'):
+        super(VoxelDataSet, self).__init__()
         self.voxels = np.array() # Storage for voxel objects
-		voxels_fn = [afn for afn in os.listdir(path) if afn.endswith('.dat')]
+        voxels_fn = [afn for afn in os.listdir(path) if afn.endswith('.dat')]
 
         # Get Voxel Arrays
         initY = False
         initX = False
         initV = False
         with open(os.path.join(path, voxels_fn[0]), 'r', encoding="utf8", errors='ignore') as f:
-			raw_data = f.readlines()
+            raw_data = f.readlines()
 
-            voxel_ph = 
-			for obj in range(len(raw_data)):
+            voxel_ph = 0
+            for obj in range(len(raw_data)):
                 current_voxel = raw_data[obj].split(' ')
 
-				while "" in current_voxel:
-					current_voxel.remove("")
+                while "" in current_voxel:
+                    current_voxel.remove("")
                 #This schema assumes the data lists, in order, each z value for a given y, 
                 # for each y at a given x, for each x
                 for x in range(32):
@@ -58,9 +58,60 @@ class VoxelDataSet(Dataset):
 
         self.voxels = voxel_ph #4 dimensional np array
 
-	def __getitem__(self, idx):
-		return self.voxels[idx]
-		
-	def __len__(self):
-		return len(self.voxels)
+    def __getitem__(self, idx):
+        return self.voxels[idx]
+        
+    def __len__(self):
+        return len(self.voxels)
 
+class trainData(Dataset):
+    def __init__(self):
+        super(trainData, self).__init__()
+        # ModelNet10 provides a dataset of models in the form of .OFF files. A voxelized form of the dataset was provided by http://aguo.us/writings/classify-modelnet.html.
+
+        voxData = np.load('modelnet10.npz')
+
+        xTest = voxData['X_test']  # ndarray of size (908, 30, 30, 30)
+        xTrain = voxData['X_train']  # ndarray of size (3991, 30, 30, 30)
+        yTest = voxData['y_test']  # ndarray of size (908, )
+        yTrain = voxData['y_train']  # ndarray of size (3991, )
+
+        self.xData = xTrain
+        self.yData = yTrain
+
+    def __getitem__(self, idx):
+        return self.xData[idx], self.yData[idx]
+
+    def __len__(self):
+        return len(self.yData)
+
+
+if __name__ == "__main__":
+    dataset = trainData()
+
+
+class testData(Dataset):
+    def __init__(self):
+        super(testData, self).__init__()
+        # ModelNet10 provides a dataset of models in the form of .OFF files. A voxelized form of the dataset was provided by http://aguo.us/writings/classify-modelnet.html.
+
+        voxData = np.load('modelnet10.npz')
+        # print(dataset.files)
+
+        xTest = voxData['X_test']  # ndarray of size (908, 30, 30, 30)
+        xTrain = voxData['X_train']  # ndarray of size (3991, 30, 30, 30)
+        yTest = voxData['y_test']  # ndarray of size (908, )
+        yTrain = voxData['y_train']  # ndarray of size (3991, )
+
+        self.xData = xTest
+        self.yData = yTest
+
+    def __getitem__(self, idx):
+        return self.xData[idx], self.yData[idx], self.testLabels[idx]
+
+    def __len__(self):
+        return len(self.yData)
+
+
+if __name__ == "__main__":
+    dataset = trainData()

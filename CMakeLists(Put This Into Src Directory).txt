@@ -1,0 +1,6 @@
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_subdirectory(public/src)
+add_subdirectory(SegFault/final_version)
+add_subdirectory(SegFault/final_version/gui)

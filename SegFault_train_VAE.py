@@ -4,8 +4,6 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 import numpy as np
 import matplotlib.pyplot as plt
-
-from SegFault_DataSet import VoxelDataSet
 from SegFault_VAE import VAE
 
 from torch.nn import functional as F

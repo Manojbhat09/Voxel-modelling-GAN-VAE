@@ -65,8 +65,6 @@ def main():
 
         return loss
 
-
-    # define optimizer for discriminator and generator separately
     optim = Adam(vae.parameters(), lr=lr, weight_decay=1e-4)
 
     epochVals = []
@@ -113,7 +111,7 @@ def main():
 
     print("TRAINING FINISHED")
 
-    torch.save(vae.state_dict(), 'vae_model.ckpt')
+    #torch.save(vae.state_dict(), 'vae_model.ckpt')
 
     plt.figure()
     for i in range(len(epochVals)):
@@ -138,8 +136,8 @@ def main():
         x_batch = x_batch.squeeze()
 
         reconstructedVoxels = torch.cat((reconstructedVoxels, output), 0)
-        print("Batch ", n_batch)
-        print(type(reconstructedVoxels[0,0,0,0,0].item()))
+        #print("Batch ", n_batch)
+        #print(type(reconstructedVoxels[0,0,0,0,0].item()))
 
     print(reconstructedVoxels.shape)
 
@@ -149,14 +147,16 @@ def main():
     outF.write("Generated Voxel Data \n")
     outF.write("Data formatted as: (0,0,0), (0,0,1), (0,0,2), ... (0,0,30), (0,1,0), (0,1,1), ... \n")
     for idx in range(3991):
-        outF.write("[")
         for x in range(30):
             for y in range(30):
                 for z in range(30):
                     currentElem = reconstructedVoxels[idx,0,x,y,z].item()
-                    outF.write(currentElem)
-                    outF.write(",")
-        outF.write("] \n")
+                    if currentElem > 0.5:
+                        outF.write(str(1))
+                    if currentElem <= 0.5:
+                        outF.write(str(0))
+                    outF.write(" ")
+        outF.write("\n")
 
     outF.close()
 

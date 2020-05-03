@@ -9,7 +9,7 @@ class trainData(Dataset):
         super(trainData, self).__init__()
         # ModelNet10 provides a dataset of models in the form of .OFF files. A voxelized form of the dataset was provided by http://aguo.us/writings/classify-modelnet.html.
 
-        voxData = np.load('data/modelnet10.npz')
+        voxData = np.load('modelnet10.npz')
 
         xTest = voxData['X_test']  # ndarray of size (908, 30, 30, 30)
         xTrain = voxData['X_train']  # ndarray of size (3991, 30, 30, 30)
@@ -42,7 +42,7 @@ class testData(Dataset):
         super(testData, self).__init__()
         # ModelNet10 provides a dataset of models in the form of .OFF files. A voxelized form of the dataset was provided by http://aguo.us/writings/classify-modelnet.html.
 
-        voxData = np.load('data/modelnet10.npz')
+        voxData = np.load('modelnet10.npz')
         # print(dataset.files)
 
         xTest = voxData['X_test']  # ndarray of size (908, 30, 30, 30)

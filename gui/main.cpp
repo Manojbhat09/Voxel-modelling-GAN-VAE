@@ -143,10 +143,28 @@ void OrbitingViewer::SetUpCamera(CameraObject& camera)
 	camera.z = focusZ - vz * dist;
 }
 
-void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2)
+void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2, int color)
 {
-	glColor3ub(255, 0, 0);
-
+	if (color == 0)
+	{
+		glColor3ub(255, 0, 0);
+	}
+	else if (color == 1)
+	{
+		glColor3ub(0, 255, 0);
+	}
+	else if (color == 2)
+	{
+		glColor3ub(0, 0, 255);
+	}
+	else if (color == 3)
+	{
+		glColor3ub(255, 255, 0);
+	}
+	else if (color == 4)
+	{
+		glColor3ub(0, 255, 255);
+	}
 	glBegin(GL_QUADS);
 
 	glVertex3d(x1, y1, z1);
@@ -181,7 +199,6 @@ void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2)
 
 	glEnd();
 
-	
 	glColor3ub(255, 255, 255);
 
 	glBegin(GL_LINES);
@@ -214,7 +231,7 @@ void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2)
 
 void LoopingInput(vector<vector<vector<float>>> input)
 {
-	int cubeSize = 1;
+	int initialCubeSize = 1;
 	int adjust = 16;
 	for (int i = 0; i < input.size(); i++)
 	{
@@ -225,7 +242,7 @@ void LoopingInput(vector<vector<vector<float>>> input)
 				if (input[i][j][k] > 0.5f)
 				{
 					DrawCube(i - adjust, j- adjust, k- adjust,
-						     i - adjust + cubeSize, j - adjust + cubeSize, k - adjust + cubeSize);
+						     i - adjust + initialCubeSize, j - adjust + initialCubeSize, k - adjust + initialCubeSize, 0);
 				}
 				else
 				{
@@ -235,7 +252,31 @@ void LoopingInput(vector<vector<vector<float>>> input)
 		}
 	}
 }
-/*
+
+void LoopingInputWithXYZ(vector<vector<vector<float>>> input, float xPos, float yPos, float zPos, float outCubeSize, int color)
+{
+	//int outCubeSize = 1;
+	int adjust = 16;
+	for (int i = 0; i < input.size(); i++)
+	{
+		for (int j = 0; j < input[i].size(); j++)
+		{
+			for (int k = 0; k < input[i][j].size(); k++)
+			{
+				if (input[i][j][k] > 0.5f)
+				{
+					DrawCube(i - adjust + xPos, j - adjust + yPos, k - adjust + zPos,
+						i - adjust + outCubeSize + xPos, j - adjust + outCubeSize + yPos, k - adjust + outCubeSize + zPos, color);
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+	}
+}
+
 void drawText(char str[256], int width, int height, int fontSize)
 {
 	glRasterPos2d(width, height);
@@ -253,7 +294,7 @@ void drawText(char str[256], int width, int height, int fontSize)
 		YsGlDrawFontBitmap20x28(str);
 	}
 }
-*/
+
 
 void arrangeText()
 {
@@ -399,7 +440,10 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	//DrawCube(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
 
 	/*test part*/
-	LoopingInput(generateTestVector(testVec));
+	//LoopingInput(generateTestVector(testVec));
+
+	LoopingInputWithXYZ(generateTestVector(testVec), -20, 0, 0, 1, 0);
+	LoopingInputWithXYZ(generateTestVector(testVec), 20, 0, 0, 2, 1);
 
 	arrangeText();
 

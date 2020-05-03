@@ -157,6 +157,7 @@ def main():
                         outF.write(str(0))
                     outF.write(" ")
         outF.write("\n")
+        print("Voxel: ", idx)
 
     outF.close()
 

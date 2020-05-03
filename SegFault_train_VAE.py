@@ -20,7 +20,7 @@ def main():
     # Definer Hyperparameters
     latent_dim = 1000
     lr = 0.005         # learning rate
-    num_epochs = 10
+    num_epochs = 0
     batch_dim = 307 #13 or 307
     gamma = 0.97
 
@@ -52,7 +52,7 @@ def main():
 
         #print("  KLD: ", KLDivergence.item())
 
-        #a = 3 #alpha, weight of KL Divergence
+        #a = 1 #alpha, weight of KL Divergence
 
         #loss = MSELoss + a * KLDivergence
         loss = MSELoss
@@ -61,12 +61,21 @@ def main():
 
         return loss
 
+    def newLoss(generatedData, targetData):
+
+        loss = 0
+
+        return loss
+
+
     # define optimizer for discriminator and generator separately
     optim = Adam(vae.parameters(), lr=lr, weight_decay=1e-4)
 
     epochVals = []
     lossVals = []
-    
+
+    print("BEGIN TRAINING")
+
     #Training
     for epoch in range(num_epochs):
         for n_batch, (x_batch, labels, BCELabels) in enumerate(trainLoader): #x_batch are the actual voxel objects, the labels are the modelnet object classes, ints from 0-9. The labels aren't terribly important.
@@ -83,6 +92,8 @@ def main():
 
             output, mu, std, l_z = vae(x_batch) 
 
+            print(output.shape)
+
             #Get Labels
             BCELabels = BCELabels.to(device)
 
@@ -94,7 +105,7 @@ def main():
 
             #print("     Loss, ", loss )
             
-            if (n_batch + 1) % 7 == 0:
+            if (n_batch + 1) % 4 == 0:
                 print("Epoch: [{}/{}], Batch: {}, loss: {}".format(
                     epoch, num_epochs, n_batch, loss.item()))
 
@@ -102,6 +113,7 @@ def main():
         lossVals = lossVals + [loss]
         print("Epoch ", epoch)
 
+    print("TRAINING FINISHED")
 
     torch.save(vae.state_dict(), 'vae_model.ckpt')
 
@@ -112,7 +124,36 @@ def main():
     plt.ylabel('Losses')
     plt.show()
 
-    #Reconstruct Objects, Output Text File
+    #Reconstruct Objects
+
+    reconstructedVoxels = torch.empty(0, 1, 30, 30, 30)
+
+    print("BEGIN RECONSTRUCTION")
+
+    for n_batch, (x_batch, labels, BCELabels) in enumerate(trainLoader): 
+        x_batch = x_batch.to(device)
+        x_batch = x_batch.unsqueeze(1) 
+        x_batch = x_batch.float()
+
+        output, mu, std, l_z = vae(x_batch) 
+
+        x_batch = x_batch.squeeze()
+
+        reconstructedVoxels = torch.cat((reconstructedVoxels, output), 0)
+        print("Batch ", n_batch)
+
+    print(reconstructedVoxels.shape)
+
+    #Write to File
+
+    outF = open("Generated_Voxels.txt", "w")
+    outF.write("Generated Voxel Data \n")
+
+    for idx in range(3991)
+        outF.write("[")
+
+
+    outF.close()
 
 
 if __name__ == "__main__":

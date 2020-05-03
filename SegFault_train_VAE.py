@@ -141,6 +141,7 @@ def main():
 
         reconstructedVoxels = torch.cat((reconstructedVoxels, output), 0)
         print("Batch ", n_batch)
+        print(type(reconstructedVoxels[0,0,0,0,0].item()))
 
     print(reconstructedVoxels.shape)
 
@@ -148,10 +149,16 @@ def main():
 
     outF = open("Generated_Voxels.txt", "w")
     outF.write("Generated Voxel Data \n")
-
-    for idx in range(3991)
+    outF.write("Data formatted as: (0,0,0), (0,0,1), (0,0,2), ... (0,0,30), (0,1,0), (0,1,1), ... \n")
+    for idx in range(3991):
         outF.write("[")
-
+        for x in range(30):
+            for y in range(30):
+                for z in range(30):
+                    currentElem = reconstructedVoxels[idx,0,x,y,z].item()
+                    outF.write(currentElem)
+                    outF.write(",")
+        outF.write("] \n")
 
     outF.close()
 

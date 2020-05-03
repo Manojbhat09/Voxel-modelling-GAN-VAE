@@ -113,7 +113,7 @@ def main():
 
     print("TRAINING FINISHED")
 
-    torch.save(vae.state_dict(), 'vae_model.ckpt')
+    #torch.save(vae.state_dict(), 'vae_model.ckpt')
 
     plt.figure()
     for i in range(len(epochVals)):
@@ -154,9 +154,9 @@ def main():
             for y in range(30):
                 for z in range(30):
                     currentElem = reconstructedVoxels[idx,0,x,y,z].item()
-                    if currentElem > 0.5
+                    if currentElem > 0.5:
                         outF.write(str(1))
-                    if currentElem <= 0.5
+                    if currentElem <= 0.5:
                         outF.write(str(0))
                     outF.write(",")
         outF.write("] \n")

@@ -32,6 +32,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <math.h>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 using namespace std;
 const double YsPi = 3.1415927;
@@ -143,10 +147,28 @@ void OrbitingViewer::SetUpCamera(CameraObject& camera)
 	camera.z = focusZ - vz * dist;
 }
 
-void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2)
+void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2, int color)
 {
-	glColor3ub(255, 0, 0);
-
+	if (color == 0)
+	{
+		glColor3ub(255, 0, 0);
+	}
+	else if (color == 1)
+	{
+		glColor3ub(0, 255, 0);
+	}
+	else if (color == 2)
+	{
+		glColor3ub(0, 0, 255);
+	}
+	else if (color == 3)
+	{
+		glColor3ub(255, 255, 0);
+	}
+	else if (color == 4)
+	{
+		glColor3ub(0, 255, 255);
+	}
 	glBegin(GL_QUADS);
 
 	glVertex3d(x1, y1, z1);
@@ -181,7 +203,6 @@ void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2)
 
 	glEnd();
 
-	
 	glColor3ub(255, 255, 255);
 
 	glBegin(GL_LINES);
@@ -212,9 +233,9 @@ void DrawCube(double x1, double y1, double z1, double x2, double y2, double z2)
 	glEnd();
 }
 
-void LoopingInput(vector<vector<vector<float>>> input)
+void LoopingInput(vector<vector<vector<int>>> input)
 {
-	int cubeSize = 1;
+	int initialCubeSize = 1;
 	int adjust = 16;
 	for (int i = 0; i < input.size(); i++)
 	{
@@ -225,7 +246,7 @@ void LoopingInput(vector<vector<vector<float>>> input)
 				if (input[i][j][k] > 0.5f)
 				{
 					DrawCube(i - adjust, j- adjust, k- adjust,
-						     i - adjust + cubeSize, j - adjust + cubeSize, k - adjust + cubeSize);
+						     i - adjust + initialCubeSize, j - adjust + initialCubeSize, k - adjust + initialCubeSize, 0);
 				}
 				else
 				{
@@ -235,7 +256,31 @@ void LoopingInput(vector<vector<vector<float>>> input)
 		}
 	}
 }
-/*
+
+void LoopingInputWithXYZ(vector<vector<vector<int>>> input, float xPos, float yPos, float zPos, float outCubeSize, int color)
+{
+	//int outCubeSize = 1;
+	int adjust = 16;
+	for (int i = 0; i < input.size(); i++)
+	{
+		for (int j = 0; j < input[i].size(); j++)
+		{
+			for (int k = 0; k < input[i][j].size(); k++)
+			{
+				if (input[i][j][k] > 0.5f)
+				{
+					DrawCube(i - adjust + xPos, j - adjust + yPos, k - adjust + zPos,
+						i - adjust + outCubeSize + xPos, j - adjust + outCubeSize + yPos, k - adjust + outCubeSize + zPos, color);
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+	}
+}
+
 void drawText(char str[256], int width, int height, int fontSize)
 {
 	glRasterPos2d(width, height);
@@ -253,7 +298,7 @@ void drawText(char str[256], int width, int height, int fontSize)
 		YsGlDrawFontBitmap20x28(str);
 	}
 }
-*/
+
 
 void arrangeText()
 {
@@ -263,31 +308,58 @@ void arrangeText()
 	YsGlDrawFontBitmap20x32(str1);
 }
 /*testPart*/
-vector<vector<vector<float>>> generateTestVector(vector<vector<vector<float>>> vec)
+vector<vector<vector<int>>> generateTestVector(vector<vector<vector<int>>> vec)
 {
 	
 
 	for (int i = 0; i < 32; i++)
 	{
-		vec.push_back(vector<vector<float>>());
+		vec.push_back(vector<vector<int>>());
 		for (int j = 0; j < 32; j++)
 		{
-			vec[i].push_back(vector<float>());
+			vec[i].push_back(vector<int>());
 			for (int k = 0; k < 32; k++)
 			{
 				if (i == j == k)
 				{
-					vec[i][j].push_back(1.0f);
+					vec[i][j].push_back(1);
 				}
 				else
 				{
-					vec[i][j].push_back(0.0f);
+					vec[i][j].push_back(0);
 				}
 			}
 		}
 	}
 
 	return vec;
+}
+
+
+void HandlingVoxelData(vector<vector<vector<vector<int>>>> inputtestVoxelData)
+{
+	int adjust = 16;
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < inputtestVoxelData[i].size(); j++)
+		{
+			for (int k = 0; k < inputtestVoxelData[i][j].size(); k++)
+			{
+				for (int l = 0; l < inputtestVoxelData[i][j][k].size(); l++)
+				{
+					if (inputtestVoxelData[i][j][k][l] > 0.5f)
+					{
+						DrawCube(j - adjust + i * 30, k - adjust, l - adjust,
+							     j - adjust + 1 + i * 30, k - adjust + 1, l - adjust + 1, i % 5);
+					}
+					else
+					{
+						continue;
+					}
+				}
+			}
+		}
+	}
 }
 
 class FsLazyWindowApplication : public FsLazyWindowApplicationBase
@@ -300,7 +372,10 @@ protected:
 	int hei = 600;
 
 	/* test part*/
-	vector<vector<vector<float>>> testVec;
+	vector<vector<vector<int>>> testVec;
+
+
+	vector<vector<vector<vector<int>>>> testVoxelData; //4d vector of dimensions (voxel index, x, y, z)
 
 public:
 	FsLazyWindowApplication();
@@ -334,6 +409,37 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 /* virtual */ void FsLazyWindowApplication::Initialize(int argc, char* argv[])
 {
 	camera.z = 10.0;
+
+	ifstream fin;
+	fin.open("Target_Voxels.txt");
+	if (fin.is_open())
+	{
+		printf("file is open\n");
+		for (int v = 2; v++; v < 35) //Data starts on third line. Iterates through lines.
+		{
+			printf("it is in first line\n");
+			for (int i = 0; i++; i < 30)
+			{
+				printf("it is in second line\n");
+				for (int j = 0; j++; j < 30)
+				{
+					printf("it is in third line\n");
+					for (int k = 0; k++; k < 30)
+					{
+						fin >> testVoxelData[v][i][j][k];
+						printf("it is in fourth line\n");
+						printf("%d\n", testVoxelData[v][i][j][k]);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		printf("file is not open\n");
+	}
+
+	printf("reading file is done.\n");
 }
 /* virtual */ void FsLazyWindowApplication::Interval(void)
 {
@@ -342,9 +448,6 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	{
 		SetMustTerminate(true);
 	}
-
-
-
 	if (0 != FsGetKeyState(FSKEY_LEFT))
 	{
 		orbit.h += YsPi / 180.0;
@@ -399,8 +502,13 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	//DrawCube(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
 
 	/*test part*/
-	LoopingInput(generateTestVector(testVec));
+	//LoopingInput(generateTestVector(testVec));
 
+	//LoopingInputWithXYZ(generateTestVector(testVec), -20, 0, 0, 1, 0);
+	//LoopingInputWithXYZ(generateTestVector(testVec), 20, 0, 0, 2, 1);
+
+	/*voxel test part*/
+	HandlingVoxelData(testVoxelData);
 	arrangeText();
 
 	// Set up 2D drawing

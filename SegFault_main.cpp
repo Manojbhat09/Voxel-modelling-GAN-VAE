@@ -19,7 +19,7 @@ int main()
 	//Run the python file, generates a .txt file in the directory
 	PyRun_SimpleFile(pyfile, filename);
 
-	Py.Finalize();
+	
 
 	//std::vector<std::vector<std::vector<std::vector<int>>>> voxelData; //4d vector of dimensions (voxel index, x, y, z)
 
@@ -50,9 +50,11 @@ int main()
 			}
 		}
 	}
-
+	
+	// int index = random_select() 
+	// putIntoGUI( &voxelData[index] ) ;
 	//Run voxeldata into GUI file as parameter
-
+	Py.Finalize();
 	return 0;
 }
 

@@ -10,11 +10,18 @@ from torch.nn import functional as F
 
 from SegFault_DataSet import trainData
 from SegFault_DataSet import testData
+<<<<<<< HEAD
+=======
+
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
 
 
+<<<<<<< HEAD
 def main(k):
     device = 'cpu'
 
+=======
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
     # Definer Hyperparameters
     latent_dim = 1000
     lr = 0.005         # learning rate
@@ -42,6 +49,7 @@ def main(k):
 
 
         #print("  MSE: ", MSELoss.item())
+<<<<<<< HEAD
 
         #print("         std: ", std)
         #print("         mu: ", mu)
@@ -50,12 +58,23 @@ def main(k):
 
         #print("  KLD: ", KLDivergence.item())
 
+=======
+
+        #print("         std: ", std)
+        #print("         mu: ", mu)
+
+        #KLDivergence = -0.5 * torch.sum(1 + std - mu.pow(2) - std.exp())
+
+        #print("  KLD: ", KLDivergence.item())
+
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
         #a = 1 #alpha, weight of KL Divergence
 
         #loss = MSELoss + a * KLDivergence
         loss = MSELoss
 
         #print("  Loss: ", loss.item())
+<<<<<<< HEAD
 
         return loss
 
@@ -67,6 +86,17 @@ def main(k):
 
 
     # define optimizer for discriminator and generator separately
+=======
+
+        return loss
+
+    def newLoss(generatedData, targetData):
+
+        loss = 0
+
+        return loss
+
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
     optim = Adam(vae.parameters(), lr=lr, weight_decay=1e-4)
 
     epochVals = []
@@ -82,6 +112,7 @@ def main(k):
 
             voxel_labels = labels.to(device)
             x_batch = x_batch.to(device)
+<<<<<<< HEAD
 
             #x_batch is of dimensions (batch_size, 30, 30, 30). Need to add a dimension for channels.
 
@@ -92,6 +123,18 @@ def main(k):
 
             print(output.shape)
 
+=======
+
+            #x_batch is of dimensions (batch_size, 30, 30, 30). Need to add a dimension for channels.
+
+            x_batch = x_batch.unsqueeze(1) 
+            x_batch = x_batch.float()
+
+            output, mu, std, l_z = vae(x_batch) 
+
+            print(output.shape)
+
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
             #Get Labels
             BCELabels = BCELabels.to(device)
 
@@ -125,6 +168,10 @@ def main(k):
     #Reconstruct Objects
 
     reconstructedVoxels = torch.empty(0, 1, 30, 30, 30)
+<<<<<<< HEAD
+=======
+    labelVoxels = torch.empty(0, 1, 30, 30, 30)
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
 
     print("BEGIN RECONSTRUCTION")
 
@@ -132,34 +179,81 @@ def main(k):
         x_batch = x_batch.to(device)
         x_batch = x_batch.unsqueeze(1) 
         x_batch = x_batch.float()
+<<<<<<< HEAD
 
         output, mu, std, l_z = vae(x_batch) 
 
         x_batch = x_batch.squeeze()
 
+=======
+        output, mu, std, l_z = vae(x_batch) 
+
+        labelVoxels = torch.cat((labelVoxels, x_batch), 0)
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
         reconstructedVoxels = torch.cat((reconstructedVoxels, output), 0)
         #print("Batch ", n_batch)
         #print(type(reconstructedVoxels[0,0,0,0,0].item()))
 
+<<<<<<< HEAD
     print(reconstructedVoxels.shape)
+=======
+    print("RECONSTRUCTION FINISHED")
+    #print(reconstructedVoxels.shape)
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
 
     #Write to File
 
     outF = open("Generated_Voxels.txt", "w")
     outF.write("Generated Voxel Data \n")
     outF.write("Data formatted as: (0,0,0), (0,0,1), (0,0,2), ... (0,0,30), (0,1,0), (0,1,1), ... \n")
+<<<<<<< HEAD
     for idx in range(3991):
         outF.write("[")
         for x in range(30):
             for y in range(30):
                 for z in range(30):
                     currentElem = reconstructedVoxels[idx,0,x,y,z].item()
+=======
+    #for idx in range(3991):
+    for idx in range(35):
+        for x in range(30):
+            for y in range(30):
+                for z in range(30):
+                    currentElem = reconstructedVoxels[(idx*100),0,x,y,z].item()
                     if currentElem > 0.5:
                         outF.write(str(1))
                     if currentElem <= 0.5:
                         outF.write(str(0))
+                    outF.write(" ")
+        outF.write(" \n")
+        print("Voxel # - ", idx)
+
+    outF.close()
+
+    #Write to File
+
+    outF = open("Target_Voxels.txt", "w")
+    outF.write("Target Voxel Data \n")
+    outF.write("Data formatted as: (0,0,0), (0,0,1), (0,0,2), ... (0,0,30), (0,1,0), (0,1,1), ... \n")
+    #for idx in range(3991):
+    for idx in range(35):
+        for x in range(30):
+            for y in range(30):
+                for z in range(30):
+                    currentElem = labelVoxels[(idx*100),0,x,y,z].item()
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
+                    if currentElem > 0.5:
+                        outF.write(str(1))
+                    if currentElem <= 0.5:
+                        outF.write(str(0))
+<<<<<<< HEAD
                     outF.write(",")
         outF.write("] /n")
+=======
+                    outF.write(" ")
+        outF.write("\n")
+        print("Voxel # - ", idx)
+>>>>>>> 77d0e4bdd0f4c7264262924b2e2a25aa90282c5c
 
     outF.close()
 

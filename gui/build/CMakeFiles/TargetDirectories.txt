@@ -1,0 +1,3 @@
+/home/droid/project/Voxel-modelling-GAN-VAE/gui/build/CMakeFiles/rebuild_cache.dir
+/home/droid/project/Voxel-modelling-GAN-VAE/gui/build/CMakeFiles/wrapper.dir
+/home/droid/project/Voxel-modelling-GAN-VAE/gui/build/CMakeFiles/edit_cache.dir

@@ -336,6 +336,7 @@ vector<vector<vector<int>>> generateTestVector(vector<vector<vector<int>>> vec)
 }
 
 
+
 void HandlingVoxelData(vector<vector<vector<vector<int>>>> inputtestVoxelData)
 {
 	int adjust = 16;
@@ -414,7 +415,7 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	char delimiter =' ';
 	int lines = 0;
 	int skiplines = 0;
-	std::vector<std::vector<int>> voxel_data;
+	vector<vector<int>> voxel_data;
 	int numLines = 0;
 	//if (file.is_open()) {
 	//	while (std::getline(file, str)) {
@@ -442,6 +443,7 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 				int dat = std::stoi(token);
 				//std::cout << dat<<"\n";
 				linedata.push_back(dat);
+				//cout << dat << endl;
 				words++;
 			}
 			//voxel_data[lines] = linedata;
@@ -449,12 +451,28 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 			lines++;
 		}
 		std::cout << "line done \n";
+		
 	}
 	else {
 		std::cout << "file is not open\n";
 	}
 	std::cout << "closing done \n";
 	file.close();
+
+	int totalIdx = 0;
+	for (int i = 0; i++; i < 30)
+	{
+		for (int j = 0; j++; j < 30)
+		{
+			for (int k = 0; k++; k < 30)
+			{
+				testVoxelData[1][i][j][k] = 2dvoxeldata[1][totalIdx];
+				totalIdx++;
+			}
+		}
+	}
+}
+
 	/*
 	ifstream fin("Target_Voxels.txt");
 	int v = 0;
@@ -575,6 +593,12 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	// 3D drawing from here
 	//DrawCube(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
 
+
+
+
+
+
+
 	/*test part*/
 	//LoopingInput(generateTestVector(testVec));
 
@@ -583,6 +607,20 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 
 	/*voxel test part*/
 	//HandlingVoxelData(testVoxelData);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	arrangeText();
 
 	// Set up 2D drawing

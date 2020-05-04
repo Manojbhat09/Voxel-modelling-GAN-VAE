@@ -13,12 +13,13 @@ from SegFault_DataSet import testData
 
 
 def main():
-    device = 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    #device = 'cpu'
 
     # Definer Hyperparameters
     latent_dim = 1000
     lr = 0.005         # learning rate
-    num_epochs = 1
+    num_epochs = 100
     batch_dim = 307 #13 or 307
     gamma = 0.97
 

@@ -36,10 +36,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <string>
 #include <sstream>
-
+#include <Python.h>
+#include <experimental/filesystem>
+// #include <filesystem>
 using namespace std;
 const double YsPi = 3.1415927;
 
+// namespace fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
 
 class CameraObject
 {
@@ -419,7 +423,57 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 /* virtual */ void FsLazyWindowApplication::Initialize(int argc, char* argv[])
 {
 	camera.z = 50;
+    std::cout << "Current path is " << fs::current_path() << '\n';
+    
+    	Py_Initialize();
+	std::cout<<"[deg] Strating\n";
+	PyObject *pFunc, *pArgs, *pModule, *input, *pDict, *pResult;
+	
+	PyRun_SimpleString("import sys");
+// 	PyRun_SimpleString("sys.path.append(\".\")");
+	PyRun_SimpleString("sys.path.append(\"scripts/.\")");
+    
+//     const char *scriptDirectoryName = "/scripts";
+//     PyObject *sysPath = PySys_GetObject("path");
+//     PyObject *path = PyString_FromString(scriptDirectoryName);
+//     int result = PyList_Insert(sysPath, 0, path);
+	pModule = PyImport_Import(PyString_FromString("inference")); //SegFault_train_VAE
+	std::cout<<"[deg] find m\n";
+	if (!pModule) {
+        PyErr_Print();
+        exit(1);
+    }
+	pDict = PyModule_GetDict(pModule);
+	std::cout<<"[deg] get dict\n";
+    
+	std::cout<<"[deg] func\n";
+	pFunc = PyDict_GetItemString(pDict, "reconstruct"); //reconstruct
+	//Run the python file, generates a .txt file in the directory
+	pArgs = PyTuple_New(1);
+	// PyObject* pointsLeft = vectorToList_Float(v_left);
+	std::cout<<"[deg] build\n";
+	input = Py_BuildValue("i", 42);
+	std::cout<<"[deg] build bnew\n";
+	PyTuple_SetItem(pArgs, 0, input);
+	
+    
+    try {
+        if(PyCallable_Check(pFunc)){
+            // Update line 
+            std::cout<<"Able to call \n";
+            pResult = PyObject_CallObject(pFunc, pArgs);
+        }
+        else{
+            std::cout<<"Function not present \n";
+        }
 
+    } catch (std::exception& e) {
+        std::cout<<"Some error \n";
+        PyErr_Print();
+    }
+    
+    Py_Finalize();
+    
 	ifstream fin;
 	vector<vector<int>> voxelData(35, vector<int>(27000));
 	testVec = generateTestVector(testVec);

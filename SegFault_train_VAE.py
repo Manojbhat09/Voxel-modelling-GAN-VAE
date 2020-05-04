@@ -123,6 +123,7 @@ def main():
     #Reconstruct Objects
 
     reconstructedVoxels = torch.empty(0, 1, 30, 30, 30)
+    labelVoxels = torch.empty(0, 1, 30, 30, 30)
 
     print("BEGIN RECONSTRUCTION")
 
@@ -130,34 +131,55 @@ def main():
         x_batch = x_batch.to(device)
         x_batch = x_batch.unsqueeze(1) 
         x_batch = x_batch.float()
-
         output, mu, std, l_z = vae(x_batch) 
 
-        x_batch = x_batch.squeeze()
-
+        labelVoxels = torch.cat((labelVoxels, x_batch), 0)
         reconstructedVoxels = torch.cat((reconstructedVoxels, output), 0)
         #print("Batch ", n_batch)
         #print(type(reconstructedVoxels[0,0,0,0,0].item()))
 
-    print(reconstructedVoxels.shape)
+    print("RECONSTRUCTION FINISHED")
+    #print(reconstructedVoxels.shape)
 
     #Write to File
 
     outF = open("Generated_Voxels.txt", "w")
     outF.write("Generated Voxel Data \n")
     outF.write("Data formatted as: (0,0,0), (0,0,1), (0,0,2), ... (0,0,30), (0,1,0), (0,1,1), ... \n")
-    for idx in range(3991):
+    #for idx in range(3991):
+    for idx in range(35):
         for x in range(30):
             for y in range(30):
                 for z in range(30):
-                    currentElem = reconstructedVoxels[idx,0,x,y,z].item()
+                    currentElem = reconstructedVoxels[(idx*100),0,x,y,z].item()
+                    if currentElem > 0.5:
+                        outF.write(str(1))
+                    if currentElem <= 0.5:
+                        outF.write(str(0))
+                    outF.write(" ")
+        outF.write(" \n")
+        print("Voxel # - ", idx)
+
+    outF.close()
+
+    #Write to File
+
+    outF = open("Target_Voxels.txt", "w")
+    outF.write("Target Voxel Data \n")
+    outF.write("Data formatted as: (0,0,0), (0,0,1), (0,0,2), ... (0,0,30), (0,1,0), (0,1,1), ... \n")
+    #for idx in range(3991):
+    for idx in range(35):
+        for x in range(30):
+            for y in range(30):
+                for z in range(30):
+                    currentElem = labelVoxels[(idx*100),0,x,y,z].item()
                     if currentElem > 0.5:
                         outF.write(str(1))
                     if currentElem <= 0.5:
                         outF.write(str(0))
                     outF.write(" ")
         outF.write("\n")
-        print("Voxel: ", idx)
+        print("Voxel # - ", idx)
 
     outF.close()
 

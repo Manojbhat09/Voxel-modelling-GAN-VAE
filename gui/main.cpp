@@ -1,14 +1,19 @@
 /* ////////////////////////////////////////////////////////////
+
 File Name: main.cpp
 Copyright (c) 2017 Soji Yamakawa.  All rights reserved.
 http://www.ysflight.com
+
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
+
 1. Redistributions of source code must retain the above copyright notice,
    this list of conditions and the following disclaimer.
+
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -19,6 +24,7 @@ GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 //////////////////////////////////////////////////////////// */
 
 #include <fslazywindow.h>
@@ -26,6 +32,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <math.h>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 using namespace std;
 const double YsPi = 3.1415927;
@@ -235,8 +245,8 @@ void LoopingInput(vector<vector<vector<int>>> input)
 			{
 				if (input[i][j][k] > 0.5f)
 				{
-					DrawCube(i - adjust, j - adjust, k - adjust,
-						i - adjust + initialCubeSize, j - adjust + initialCubeSize, k - adjust + initialCubeSize, 0);
+					DrawCube(i - adjust, j- adjust, k- adjust,
+						     i - adjust + initialCubeSize, j - adjust + initialCubeSize, k - adjust + initialCubeSize, 0);
 				}
 				else
 				{
@@ -271,39 +281,13 @@ void LoopingInputWithXYZ(vector<vector<vector<int>>> input, float xPos, float yP
 	}
 }
 
-void HandlingVoxelData(vector<vector<vector<vector<int>>>> inputtestVoxelData)
-{
-	int adjust = 16;
-	for (int i = 0; i < inputtestVoxelData.size(); i++)
-	{
-		for (int j = 0; j < inputtestVoxelData[i].size(); j++)
-		{
-			for (int k = 0; k < inputtestVoxelData[i][j].size(); k++)
-			{
-				for (int l = 0; l < inputtestVoxelData[i][j][k].size(); l++)
-				{
-					if (inputtestVoxelData[i][j][k][l] > 0.5f)
-					{
-						DrawCube(j - adjust + i*30, k - adjust, l - adjust,
-							j - adjust + 1 + i * 30, k - adjust + 1, l - adjust, i%5);
-					}
-					else
-					{
-						continue;
-					}
-				}
-			}
-		}
-	}
-}
-
 void drawText(char str[256], int width, int height, int fontSize)
 {
 	glRasterPos2d(width, height);
 	if (fontSize == 0)
 	{
 		YsGlDrawFontBitmap12x16(str);
-
+		
 	}
 	else if (fontSize == 1)
 	{
@@ -323,11 +307,10 @@ void arrangeText()
 	sprintf(str1, "Voxel Visualizer");
 	YsGlDrawFontBitmap20x32(str1);
 }
-
 /*testPart*/
 vector<vector<vector<int>>> generateTestVector(vector<vector<vector<int>>> vec)
 {
-
+	
 
 	for (int i = 0; i < 32; i++)
 	{
@@ -339,17 +322,44 @@ vector<vector<vector<int>>> generateTestVector(vector<vector<vector<int>>> vec)
 			{
 				if (i == j == k)
 				{
-					vec[i][j].push_back(1.0f);
+					vec[i][j].push_back(1);
 				}
 				else
 				{
-					vec[i][j].push_back(0.0f);
+					vec[i][j].push_back(0);
 				}
 			}
 		}
 	}
 
 	return vec;
+}
+
+
+void HandlingVoxelData(vector<vector<vector<vector<int>>>> inputtestVoxelData)
+{
+	int adjust = 16;
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < inputtestVoxelData[i].size(); j++)
+		{
+			for (int k = 0; k < inputtestVoxelData[i][j].size(); k++)
+			{
+				for (int l = 0; l < inputtestVoxelData[i][j][k].size(); l++)
+				{
+					if (inputtestVoxelData[i][j][k][l] > 0.5f)
+					{
+						DrawCube(j - adjust + i * 30, k - adjust, l - adjust,
+							     j - adjust + 1 + i * 30, k - adjust + 1, l - adjust + 1, i % 5);
+					}
+					else
+					{
+						continue;
+					}
+				}
+			}
+		}
+	}
 }
 
 class FsLazyWindowApplication : public FsLazyWindowApplicationBase
@@ -364,17 +374,8 @@ protected:
 	/* test part*/
 	vector<vector<vector<int>>> testVec;
 
-	/*test voxel Data*/
-	vector<vector<vector<vector<int> > > > testVoxelData(
-		3991,
-		vector < vector < vector<int>(
-			30,
-			vector < vector<int>(
-				30,
-				vector<int>(30)
-				)
-			)
-	);
+
+	vector<vector<vector<vector<int>>>> testVoxelData; //4d vector of dimensions (voxel index, x, y, z)
 
 public:
 	FsLazyWindowApplication();
@@ -408,6 +409,37 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 /* virtual */ void FsLazyWindowApplication::Initialize(int argc, char* argv[])
 {
 	camera.z = 10.0;
+
+	ifstream fin;
+	fin.open("Target_Voxels.txt");
+	if (fin.is_open())
+	{
+		printf("file is open\n");
+		for (int v = 2; v++; v < 35) //Data starts on third line. Iterates through lines.
+		{
+			printf("it is in first line\n");
+			for (int i = 0; i++; i < 30)
+			{
+				printf("it is in second line\n");
+				for (int j = 0; j++; j < 30)
+				{
+					printf("it is in third line\n");
+					for (int k = 0; k++; k < 30)
+					{
+						fin >> testVoxelData[v][i][j][k];
+						printf("it is in fourth line\n");
+						printf("%d\n", testVoxelData[v][i][j][k]);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		printf("file is not open\n");
+	}
+
+	printf("reading file is done.\n");
 }
 /* virtual */ void FsLazyWindowApplication::Interval(void)
 {
@@ -416,9 +448,6 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	{
 		SetMustTerminate(true);
 	}
-
-
-
 	if (0 != FsGetKeyState(FSKEY_LEFT))
 	{
 		orbit.h += YsPi / 180.0;
@@ -445,7 +474,7 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	}
 	else
 	{
-		orbit.h -= (YsPi / 180.0) * 0.1f;
+		orbit.h -= (YsPi / 180.0)*0.1f;
 	}
 	orbit.SetUpCamera(camera);
 
@@ -475,17 +504,11 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	/*test part*/
 	//LoopingInput(generateTestVector(testVec));
 
-	LoopingInputWithXYZ(generateTestVector(testVec), -20, 0, 0, 1, 0);
-	LoopingInputWithXYZ(generateTestVector(testVec), 20, 0, 0, 2, 1);
-
+	//LoopingInputWithXYZ(generateTestVector(testVec), -20, 0, 0, 1, 0);
+	//LoopingInputWithXYZ(generateTestVector(testVec), 20, 0, 0, 2, 1);
 
 	/*voxel test part*/
 	HandlingVoxelData(testVoxelData);
-
-
-
-
-
 	arrangeText();
 
 	// Set up 2D drawing

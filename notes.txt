@@ -1,0 +1,3 @@
+cp ~/project/Voxel-modelling-GAN-VAE/VAE/gui/scripts ~/project/build/VAE/gui/ -r
+cp ~/project/Voxel-modelling-GAN-VAE/VAE/Target_Voxels.txt ~/project/build/VAE/gui/
+cp ~/project/Voxel-modelling-GAN-VAE/VAE/Generated_Voxels.txt ~/project/build/VAE/gui/

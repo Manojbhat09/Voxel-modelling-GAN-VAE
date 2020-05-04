@@ -374,7 +374,7 @@ protected:
 
 	/* test part*/
 	vector<vector<vector<int>>> testVec;
-
+	//vector<vector<int>> voxDat(35, vector<int>(27000));
 
 	vector<vector<vector<vector<int>>>> testVoxelData; //4d vector of dimensions (voxel index, x, y, z)
 
@@ -410,20 +410,53 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 /* virtual */ void FsLazyWindowApplication::Initialize(int argc, char* argv[])
 {
 	camera.z = 10.0;
-	std::ifstream file("Target_Voxels.txt");
+
+	ifstream fin;
+	vector<vector<int>> voxelData(35, vector<int>(27000));
+
+	fin.open("Target_Voxels.txt");
+	for (int i = 0; i < 35; i++)
+	{
+		for (int j = 0; j < 27000; j++)
+		{
+			fin >> voxelData[i][j];
+			//cout << voxelData[i][j];
+		}
+	}
+
+	//cout << voxelData[5].size() << endl;
+	//cout << voxelData[6].size() << endl;
+	//cout << voxelData[7].size() << endl;
+
+	vector<vector<vector<vector<int>>>> voxContainer(35, vector<vector<vector<int>>>(30,vector<vector<int>>(30,vector<int>(30))));
+
+	for (int v = 0; v < 30; v++)
+	{
+		int totalIdx = 0;
+		for (int i = 0; i < 30; i++)
+		{
+			for (int j = 0; j < 30; j++)
+			{
+				for (int k = 0; k < 30; k++)
+				{
+					voxContainer[v][i][j][k] = voxelData[v][totalIdx];
+					totalIdx++;
+				}
+			}
+		}
+	}
+
+	cout << voxContainer[5].size() << endl;
+	cout << voxContainer[5][5].size() << endl;
+	cout << voxContainer[5][5][5].size() << endl;
+
+	/*std::ifstream file("Target_Voxels.txt");
 	std::string str;
 	char delimiter =' ';
 	int lines = 0;
 	int skiplines = 0;
 	vector<vector<int>> voxel_data;
 	int numLines = 0;
-	//if (file.is_open()) {
-	//	while (std::getline(file, str)) {
-	//		numLines++;
-	//	}
-	//}
-	//std::cout << "Lines " << numLines << "\n";
-	//voxel_data.resize(numLines);
 	if (file.is_open()) {
 		while (std::getline(file, str)) {
 			skiplines++;
@@ -457,21 +490,8 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 		std::cout << "file is not open\n";
 	}
 	std::cout << "closing done \n";
-	file.close();
+	file.close();*/
 
-	int totalIdx = 0;
-	for (int i = 0; i++; i < 30)
-	{
-		for (int j = 0; j++; j < 30)
-		{
-			for (int k = 0; k++; k < 30)
-			{
-				testVoxelData[1][i][j][k] = 2dvoxeldata[1][totalIdx];
-				totalIdx++;
-			}
-		}
-	}
-}
 
 	/*
 	ifstream fin("Target_Voxels.txt");
@@ -593,12 +613,6 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	// 3D drawing from here
 	//DrawCube(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
 
-
-
-
-
-
-
 	/*test part*/
 	//LoopingInput(generateTestVector(testVec));
 
@@ -607,19 +621,6 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 
 	/*voxel test part*/
 	//HandlingVoxelData(testVoxelData);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	arrangeText();
 

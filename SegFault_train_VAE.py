@@ -12,7 +12,7 @@ from SegFault_DataSet import trainData
 from SegFault_DataSet import testData
 
 
-def main():
+def main(k):
     device = 'cpu'
 
     # Definer Hyperparameters
@@ -159,7 +159,7 @@ def main():
                     if currentElem <= 0.5:
                         outF.write(str(0))
                     outF.write(",")
-        outF.write("] \n")
+        outF.write("] /n")
 
     outF.close()
 

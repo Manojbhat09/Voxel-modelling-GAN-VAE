@@ -409,63 +409,111 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 /* virtual */ void FsLazyWindowApplication::Initialize(int argc, char* argv[])
 {
 	camera.z = 10.0;
-
 	std::ifstream file("Target_Voxels.txt");
 	std::string str;
-	char delimiter=" ";
-	int lines=0;
-	if(file.is_open()){
-		while(std::getline(file, str)){
+	char delimiter =' ';
+	int lines = 0;
+	int skiplines = 0;
+	std::vector<std::vector<int>> voxel_data;
+	int numLines = 0;
+	//if (file.is_open()) {
+	//	while (std::getline(file, str)) {
+	//		numLines++;
+	//	}
+	//}
+	//std::cout << "Lines " << numLines << "\n";
+	//voxel_data.resize(numLines);
+	if (file.is_open()) {
+		while (std::getline(file, str)) {
+			skiplines++;
+			if (skiplines <= 2) continue;
+
 			// Debug
-			std::cout<<"line num "<< lines<<"\n";
-			int words=0;
+			std::cout << "line num " << lines << "\n";
+			int words = 0;
 			// Debug
 
 			std::istringstream tokenStream(str);
 			std::string token;
 			std::vector<int> linedata;
-			linedata.resize(30);
-			while(std::getline(tokenStream,token,delimiter)){
-				std::cout<<"word num "<< words<<"\n";
-				linedata.push_back(std::stoi(token));
+			while (std::getline(tokenStream, token, delimiter)) {
+				//std::cout << "word num " << words << "\n";
+				//std::cout << token<<"\n";
+				int dat = std::stoi(token);
+				//std::cout << dat<<"\n";
+				linedata.push_back(dat);
 				words++;
 			}
+			//voxel_data[lines] = linedata;
+			voxel_data.push_back(linedata);
 			lines++;
 		}
-	}else{
-		std::cout<<"file is not open\n";
+		std::cout << "line done \n";
+	}
+	else {
+		std::cout << "file is not open\n";
+	}
+	std::cout << "closing done \n";
+	file.close();
+	/*
+	ifstream fin("Target_Voxels.txt");
+	int v = 0;
+	for (std::string line; std::getline(fin, line); )
+	{
+
+		testVoxelData.push_back(vector<vector<vector<int>>>());
+		v++;
+		for (int i = 0; i < 32; i++)
+		{
+			testVoxelData[i].push_back(vector<vector<int>>());
+			for (int j = 0; j < 32; j++)
+			{
+				testVoxelData[i][j].push_back(vector<int>());
+				for (int k = 0; k < 32; k++)
+				{
+					testVoxelData[i][j][k];
+				}
+			}
+		}
 	}
 	
+	for (std::string line; std::getline(fin, line); ) 
+	{
+		lines.push_back(line);
+	}
+	*/
+	/*
 
-	// if (fin.is_open())
-	// {
-
-		// printf("file is open\n");
-		// for (int v = 2; v++; v < 35) //Data starts on third line. Iterates through lines.
-		// {
-		// 	printf("it is in first line\n");
-		// 	for (int i = 0; i++; i < 30)
-		// 	{
-		// 		printf("it is in second line\n");
-		// 		for (int j = 0; j++; j < 30)
-		// 		{
-		// 			printf("it is in third line\n");
-		// 			for (int k = 0; k++; k < 30)
-		// 			{
-		// 				fin >> testVoxelData[v][i][j][k];
-		// 				printf("it is in fourth line\n");
-		// 				printf("%d\n", testVoxelData[v][i][j][k]);
-		// 			}
-		// 		}
-		// 	}
-		// }
-	// }
-	// else
-	// {
-	// 	printf("file is not open\n");
-	// }
+	fin.open("Target_Voxels.txt");
+	if (fin.is_open())
+	{
+		printf("file is open\n");
+		for (int v = 2; v++; v < 35) //Data starts on third line. Iterates through lines.
+		{
+			printf("it is in first line\n");
+			for (int i = 0; i++; i < 30)
+			{
+				printf("it is in second line\n");
+				for (int j = 0; j++; j < 30)
+				{
+					printf("it is in third line\n");
+					for (int k = 0; k++; k < 30)
+					{
+						fin >> testVoxelData[v][i][j][k];
+						printf("it is in fourth line\n");
+						printf("%d\n", testVoxelData[v][i][j][k]);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		printf("file is not open\n");
+	}
 
 	printf("reading file is done.\n");
+	*/
 }
 /* virtual */ void FsLazyWindowApplication::Interval(void)
 {
@@ -534,7 +582,7 @@ FsLazyWindowApplication::FsLazyWindowApplication()
 	//LoopingInputWithXYZ(generateTestVector(testVec), 20, 0, 0, 2, 1);
 
 	/*voxel test part*/
-	HandlingVoxelData(testVoxelData);
+	//HandlingVoxelData(testVoxelData);
 	arrangeText();
 
 	// Set up 2D drawing
